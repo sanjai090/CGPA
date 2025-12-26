@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CGPA Calculator - Engineering</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: 
+            linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+            url("bg.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            width: 500px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background: #4f46e5;
+            color: white;
+        }
+        select, input {
+            width: 90%;
+            padding: 6px;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px;
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #3730a3;
+        }
+        .result {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>CGPA Calculator</h2><br><br>
+    <center><h4>Department Of CSE</h4></center>
+    <label><b>Select Semester:</b></label><br><br>
+<select onchange="loadSemester(this.value)">
+    <option value="">-- Select --</option>
+    <option value="1">Semester 1</option>
+    <option value="2">Semester 2</option>
+    <option value="3">Semester 3</option>
+    <option value="4">Semester 4</option>
+    <option value="5">Semester 5</option>
+    <option value="6">Semester 6</option>
+    <option value="7">Semester 7</option>
+</select><br><br>
+
+
+    <table id="cgpaTable">
+        <tr>
+            <th>Subject</th>
+            <th>Credits</th>
+            <th>Grade</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td><input type="number" min="1"></td>
+            <td>
+                <select>
+                    <option value="">Select</option>
+                    <option value="10">O</option>
+                    <option value="9">A+</option>
+                    <option value="8">A</option>
+                    <option value="7">B+</option>
+                    <option value="6">B</option>
+                    <option value="5">C</option>
+                    <option value="0">U</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+
+    <button onclick="addRow()">Add Subject</button>
+    <button onclick="calculateCGPA()">Calculate CGPA</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+/* ===== Grade Dropdown ===== */
+function gradeDropdown() {
+    return `
+        <select>
+            <option value="">Select</option>
+            <option value="10">O</option>
+            <option value="9">A+</option>
+            <option value="8">A</option>
+            <option value="7">B+</option>
+            <option value="6">B</option>
+            <option value="5">C</option>
+            <option value="0">U</option>
+        </select>
+    `;
+}
+
+/* ===== Curriculum Data ===== */
+const curriculum = {
+  "1": [
+    { subject: "Professional English – I", credits: 3 },
+    { subject: "Matrices and Calculus", credits: 4 },
+    { subject: "Engineering Physics", credits: 3 },
+    { subject: "Engineering Chemistry", credits: 3 },
+    { subject: "Problem Solving and Python Programming", credits: 3 },
+    { subject: "Heritage of Tamils", credits: 1 },
+    { subject: "Programming Laboratory", credits: 2 },
+    { subject: "Physics and Chemistry Laboratory", credits: 2 },
+    { subject: "English Laboratory", credits: 2 }
+  ],
+  "2": [
+    { subject: "Professional English – II", credits: 2 },
+    { subject: "Numerical Methods and Statistics", credits: 4 },
+    { subject: "Physics for Information Science", credits: 3 },
+    { subject: "Basic Electrical and Electronics Engineering", credits: 3 },
+    { subject: "Engineering Graphics", credits: 4 },
+    { subject: "Programming in C", credits: 3 },
+    { subject: "Tamils and Technology", credits: 1 },
+    { subject: "Engineering Practices Laboratory", credits: 2 },
+    { subject: "Programming in C Laboratory", credits: 2 },
+    { subject: "Communication Laboratory", credits: 2 }
+  ],
+  "3": [
+    { subject: "Discrete Mathematics", credits: 4 },
+    { subject: "Foundations of Data Science", credits: 3 },
+    { subject: "Data Structures", credits: 3 },
+    { subject: "Object Oriented Programming", credits: 3 },
+    { subject: "Digital Principles and Computer Organization", credits: 4 },
+    { subject: "Entrepreneurship and Startup", credits: 1 },
+    { subject: "Data Science Laboratory", credits: 2 },
+    { subject: "Data Structures Laboratory", credits: 1.5 },
+    { subject: "Object Oriented Programming Laboratory", credits: 2 }
+  ],
+  "4": [
+    { subject: "Database Management Systems", credits: 3 },
+    { subject: "Theory of Computation", credits: 3 },
+    { subject: "Operating Systems", credits: 3 },
+    { subject: "Artificial Intelligence and Machine Learning", credits: 3 },
+    { subject: "Design and Analysis of Algorithms", credits: 3 },
+    { subject: "Environmental Sciences and Sustainability", credits: 2 },
+    { subject: "Database Management Systems Laboratory", credits: 1.5 }
+  ],
+  "5": [
+    { subject: "Cryptography and Cyber Security", credits: 3 },
+    { subject: "Distributed Computing", credits: 3 },
+    { subject: "Computer Networks", credits: 3 },
+    { subject: "Object Oriented Software Engineering", credits: 3 },
+    { subject: "Professional Elective – I", credits: 3 },
+    { subject: "Professional Elective – II", credits: 3 }
+  ],
+  "6": [
+    { subject: "Compiler Design", credits: 3 },
+    { subject: "Embedded Systems and IoT", credits: 3 },
+    { subject: "Professional Elective – III", credits: 3 },
+    { subject: "Professional Elective – IV", credits: 3 },
+    { subject: "Professional Elective – V", credits: 3 },
+    { subject: "Open Elective – I", credits: 3 }
+  ],
+  "7": [
+    { subject: "Human Values and Ethics", credits: 2 },
+    { subject: "Elective – Management", credits: 3 },
+    { subject: "Open Elective – II", credits: 3 },
+    { subject: "Open Elective – III", credits: 3 },
+    { subject: "Open Elective – IV", credits: 3 },
+    { subject: "Summer Internship", credits: 2 },
+    { subject: "Mini Project", credits: 2 }
+  ]
+};
+
+/* ===== Load Semester ===== */
+function loadSemester(sem) {
+    const table = document.getElementById("cgpaTable");
+    table.innerHTML = `
+        <tr>
+            <th>Subject</th>
+            <th>Credits</th>
+            <th>Grade</th>
+        </tr>
+    `;
+    if (!sem) return;
+
+    curriculum[sem].forEach(item => {
+        const row = table.insertRow();
+        row.innerHTML = `
+            <td>${item.subject}</td>
+            <td>${item.credits}</td>
+            <td>${gradeDropdown()}</td>
+        `;
+    });
+}
+
+/* ===== Add Manual Subject ===== */
+function addRow() {
+    const table = document.getElementById("cgpaTable");
+    const row = table.insertRow();
+    row.innerHTML = `
+        <td><input type="text" placeholder="Subject Name"></td>
+        <td><input type="number" min="1" step="0.5"></td>
+        <td>${gradeDropdown()}</td>
+    `;
+}
+
+/* ===== CGPA Calculation ===== */
+function calculateCGPA() {
+    const table = document.getElementById("cgpaTable");
+    let totalCredits = 0, totalPoints = 0;
+
+    for (let i = 1; i < table.rows.length; i++) {
+        let creditsCell = table.rows[i].cells[1];
+        let credits = creditsCell.innerText || creditsCell.children[0].value;
+        let grade = table.rows[i].cells[2].children[0].value;
+
+        if (!credits || grade === "") {
+            alert("Please fill all fields");
+            return;
+        }
+
+        credits = parseFloat(credits);
+        totalCredits += credits;
+        totalPoints += credits * parseInt(grade);
+    }
+
+    document.getElementById("result").innerText =
+        "Your CGPA is: " + (totalPoints / totalCredits).toFixed(2);
+}
+</script>
+
+</body>
+</html>
